@@ -1,3 +1,6 @@
+build/
+dist/
+shopee.egg-info/
 .idea/
 __pycache__/
 venv/
