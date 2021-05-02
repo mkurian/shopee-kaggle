@@ -1,1 +1,1 @@
-pip install -r requirements.txt# shopee-kaggle
+pip install -r requirements.txt
