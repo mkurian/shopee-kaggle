@@ -118,16 +118,20 @@ class GeneratePairs:
 
         final = list(set([tuple(t) for t in matching_pairs]))
         matching = pd.DataFrame().from_records(final, columns=['one', 'two'])
+        matching = matching.sort_values(by=['one'])
         matching.to_csv(path + '/matching_pairs.csv')
 
         non_matching_pairs = []
-        for i in range(len(matching_pairs)):
-            pair = [i, i + 1]
-            if i not in ['one']:
-                non_matching_pairs.append(pair)
-            if len(non_matching_pairs) == len(matching_pairs):
+        counter = 0
+        for j in range(0, len(matching_pairs)):
+            if j not in matching['one']:
+                #doesn't work, manually edit if there is a subsequent image pair match
+                #non_matching_pairs.append([j, j+ 1])
+                counter += 1
+            if counter == matching.shape[0]:
                 break
         non_matching = pd.DataFrame().from_records(non_matching_pairs, columns=['one', 'two'])
+        non_matching = non_matching.sort_values(by=['one'])
         non_matching.to_csv(path + '/non_matching_pairs.csv')
         return
 
