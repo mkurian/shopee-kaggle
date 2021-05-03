@@ -1,5 +1,4 @@
 import Explorer
-import os
 
 if __name__ == '__main__':
     imageHandler = Explorer.ImageHandler()
@@ -22,10 +21,4 @@ if __name__ == '__main__':
     matches = matchFinder.match_matrix(train_1000['image_phash'])
 
     generator = Explorer.GeneratePairs()
-    matching_pairs = generator.generate_matching_pairs(matches)
-    matching_pairs.to_csv(path + '/matching_pairs_1000.csv')
-    print(f" matching pairs: {len(matching_pairs)}")
-
-    non_matching_pairs = generator.generate_nonmatching_pairs(matching_pairs)
-    non_matching_pairs.to_csv(path + '/non_matching_pairs_1000.csv')
-    print(f" non-matching pairs: {len(non_matching_pairs)}")
+    generator.generate_matching_pairs(path, matches)

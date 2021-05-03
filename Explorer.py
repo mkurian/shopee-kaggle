@@ -90,7 +90,7 @@ class MatchFinder:
 
 class GeneratePairs:
 
-    def generate_matching_pairs(self, matches):
+    def generate_matching_pairs(self, path, matches):
         matchingsets = []
         for i in range(len(matches)):
             matchingsets.append(matches.iloc[i, :][matches.iloc[i, :] == 0].index.values)
@@ -117,17 +117,18 @@ class GeneratePairs:
             matching_pairs.append([value[2], value[3]])
 
         final = list(set([tuple(t) for t in matching_pairs]))
+        matching = pd.DataFrame().from_records(final, columns=['one', 'two'])
+        matching.to_csv(path + '/matching_pairs.csv')
 
-        return pd.DataFrame().from_records(final, columns=['one', 'two'])
-
-    def generate_nonmatching_pairs(self, matching_pairs):
         non_matching_pairs = []
         for i in range(len(matching_pairs)):
-            if [i, i+1] not in matching_pairs:
-                non_matching_pairs.append([i, i+1])
+            pair = [i, i + 1]
+            if i not in ['one']:
+                non_matching_pairs.append(pair)
             if len(non_matching_pairs) == len(matching_pairs):
                 break
-        return pd.DataFrame().from_records(non_matching_pairs, columns=['one', 'two'])
+        non_matching = pd.DataFrame().from_records(non_matching_pairs, columns=['one', 'two'])
+        non_matching.to_csv(path + '/non_matching_pairs.csv')
         return
 
     def mergeDatasets(self, matching, nonmatching):
