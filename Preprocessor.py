@@ -5,7 +5,8 @@ import seaborn as sns
 import numpy as np
 import tqdm
 from tqdm.auto import tqdm as tqdmp
-
+import torch
+from torchvision import transforms
 tqdmp.pandas()
 
 # Work with phash
@@ -50,12 +51,20 @@ class DataLoader:
 
 
 class ImageHandler:
-
-    # def __init__(self):
-
     def image_shape(self, image_path):
         im = cv2.imread(image_path)
         return str(im.shape)
+
+    def standardize_image(self, width, height, orig_path, new_path):
+        torch.manual_seed(17)
+        self.image_viz(orig_path)
+        image = cv2.imread(orig_path)
+        dim = (width, height)
+        # resize image
+        resized = cv2.resize(image, dim, interpolation=cv2.INTER_AREA)
+        tran = transforms.ToTensor()  # Convert the numpy array (C, H, W) Tensor format and /255 normalize to [0, 1.0]
+        img_tensor = tran(resized) # (C,H,W), channel order (B, G, R)
+        torch.save(img_tensor, new_path)
 
     def image_viz(self, image_path):
         img = cv2.imread(image_path)
@@ -75,6 +84,11 @@ class ImageHandler:
             self.image_viz(path)
         plt.show()
 
+    # Generate shape of image, resize them to 200 x 200, as that is the min found in this set
+    # Then generate the array which represents each image
+    # Divide them all by 255 to scale them
+    # Persist these images in disk before next steps
+
 
 class MatchFinder:
     def match_matrix(self, phash_array):
@@ -88,7 +102,7 @@ class MatchFinder:
         return phash_matrix
 
 
-class GeneratePairs:
+class GenerateDataset:
 
     def generate_matching_pairs(self, path, matches):
         matchingsets = []
@@ -117,6 +131,7 @@ class GeneratePairs:
             matching_pairs.append([value[2], value[3]])
 
         final = list(set([tuple(t) for t in matching_pairs]))
+
         matching = pd.DataFrame().from_records(final, columns=['one', 'two'])
         matching = matching.sort_values(by=['one'])
         matching.to_csv(path + '/matching_pairs.csv')
@@ -135,8 +150,18 @@ class GeneratePairs:
         non_matching.to_csv(path + '/non_matching_pairs.csv')
         return
 
-    def mergeDatasets(self, matching, nonmatching):
-        return
+    def merged_dataset(self, index_df, train_df):
+        # Merge data from training set with image pairs [posting_id, image, image_phash, title, label_group]
+        # from train_df
+        train_df['index'] = train_df.index
 
-    def saveMergedDataset(self):
-        return
+        dataset_one = train_df.loc[index_df['one']]
+        dataset_one['idx'] = index_df.index
+        dataset_two = train_df.loc[index_df['two']]
+        dataset_two['idx'] = index_df.index
+
+        dataset = pd.merge(dataset_one, dataset_two, on='idx', suffixes=['_1', '_2'])
+        dataset = pd.merge(dataset, index_df, left_index=True, right_index=True)
+        return dataset
+
+
