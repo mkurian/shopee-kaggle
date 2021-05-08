@@ -56,6 +56,11 @@ class ImageHandler:
         return str(im.shape)
 
     def standardize_image(self, width, height, orig_path, new_path):
+        # Generate shape of image, resize them to 200 x 200, as that is the min found in this set
+        # Then generate the array which represents each image
+        # Divide them all by 255 to scale them
+        # Persist these images in disk before next steps
+
         torch.manual_seed(17)
         self.image_viz(orig_path)
         image = cv2.imread(orig_path)
@@ -84,10 +89,6 @@ class ImageHandler:
             self.image_viz(path)
         plt.show()
 
-    # Generate shape of image, resize them to 200 x 200, as that is the min found in this set
-    # Then generate the array which represents each image
-    # Divide them all by 255 to scale them
-    # Persist these images in disk before next steps
 
 
 class MatchFinder:
